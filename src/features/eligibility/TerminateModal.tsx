@@ -61,9 +61,8 @@ export function TerminateModal({ row, onClose }: Props) {
         </label>
 
         <div className={styles.warning}>
-          ⚠ This will close the in-force enrollment and write a TERMED segment via atlas
-          <code>POST /commands</code>. The bitemporal timeline preserves the original ACTIVE row
-          (txn_to is set, not deleted) so audit history stays intact.
+          Coverage for this member ends on the selected date. The termination is auditable and
+          reversible from the member's timeline if corrections are needed later.
         </div>
 
         <div className={styles.actions}>

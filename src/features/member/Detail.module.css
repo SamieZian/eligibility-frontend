@@ -344,3 +344,28 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
 }
+
+/* Live-update indicator — small green dot that pulses when a subscription
+   event arrives and fades back to a steady idle state ~1.5s later. */
+.liveDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 10px;
+  background: #34a56322;
+  border: 1px solid #34a56355;
+  vertical-align: middle;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.liveDotOn {
+  background: #34a563;
+  border-color: #34a563;
+  box-shadow: 0 0 0 4px #34a56333;
+  animation: liveDotPulse 1.2s ease-out 1;
+}
+@keyframes liveDotPulse {
+  0%   { box-shadow: 0 0 0 0   #34a56366; }
+  70%  { box-shadow: 0 0 0 10px #34a56300; }
+  100% { box-shadow: 0 0 0 0   #34a56300; }
+}

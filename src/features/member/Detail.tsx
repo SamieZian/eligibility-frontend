@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { enrollmentTimeline } from '../../api/bff';
+import { subscribeEnrollmentUpdates } from '../../api/subscriptions';
 import type { TimelineSegment } from '../../api/types';
 import { Spinner } from '../../components/Spinner';
 import styles from './Detail.module.css';
@@ -16,10 +17,30 @@ const INFINITY_DATE = '9999-12-31';
 
 export function MemberDetail({ memberId, onClose }: Props) {
   const [view, setView] = useState<ViewMode>('gantt');
+  const [livePulse, setLivePulse] = useState(false);
+  const pulseTimer = useRef<number | null>(null);
+  const qc = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ['timeline', memberId],
     queryFn: () => enrollmentTimeline(memberId),
   });
+
+  // Live refresh: subscribe while the drawer is mounted. When an event
+  // arrives for this member, invalidate the timeline query so TanStack
+  // Query refetches, and flash the green dot for ~1.5s.
+  useEffect(() => {
+    if (!memberId) return;
+    const unsub = subscribeEnrollmentUpdates(memberId, () => {
+      qc.invalidateQueries({ queryKey: ['timeline', memberId] });
+      setLivePulse(true);
+      if (pulseTimer.current !== null) window.clearTimeout(pulseTimer.current);
+      pulseTimer.current = window.setTimeout(() => setLivePulse(false), 1500);
+    });
+    return () => {
+      unsub();
+      if (pulseTimer.current !== null) window.clearTimeout(pulseTimer.current);
+    };
+  }, [memberId, qc]);
 
   return (
     <div
@@ -31,8 +52,15 @@ export function MemberDetail({ memberId, onClose }: Props) {
       <aside className={styles.drawer} role="dialog" aria-label="Member detail">
         <header className={styles.header}>
           <div>
-            <h2>Member Timeline</h2>
-            <span className={styles.subtitle}>Bitemporal view — valid time × transaction time</span>
+            <h2>
+              Member Timeline
+              <span
+                className={`${styles.liveDot} ${livePulse ? styles.liveDotOn : ''}`}
+                title={livePulse ? 'Just updated' : 'Live'}
+                aria-label={livePulse ? 'Live update received' : 'Live'}
+              />
+            </h2>
+            <span className={styles.subtitle}>Coverage history — when each enrollment was effective and when it was recorded</span>
           </div>
           <div className={styles.headerActions}>
             <div className={styles.viewToggle} role="tablist">
@@ -134,7 +162,7 @@ function Gantt({ segments }: { segments: TimelineSegment[] }) {
           <span className={`${styles.bar} ${styles.barTermed} ${styles.legendSwatch}`} /> Terminated
         </span>
         <span className={styles.legendItem}>
-          <span className={`${styles.bar} ${styles.barHistory} ${styles.legendSwatch}`} /> Historical (txn_to set)
+          <span className={`${styles.bar} ${styles.barHistory} ${styles.legendSwatch}`} /> Superseded by a later correction
         </span>
         <span className={styles.legendItem}>
           <span className={styles.todayMarkerLegend} /> Today
@@ -201,10 +229,9 @@ function Gantt({ segments }: { segments: TimelineSegment[] }) {
       {/* Explanatory footer */}
       <div className={styles.ganttFooter}>
         <strong>How to read this:</strong>{' '}
-        Each horizontal bar is one enrollment segment. The bar spans its <em>valid-time</em>
-        (the real-world coverage window). Bars that are <em>dimmed</em> have been closed by a later correction —
-        their <code>txn_to</code> is set, so they're historical from the system's perspective but still represent
-        what the system believed at the time.
+        Each bar is one enrollment period. Green bars show active coverage, red bars
+        show terminated coverage, and dimmed bars show what the record looked like
+        before a later correction replaced it. Hover a bar for exact dates.
       </div>
     </div>
   );
@@ -226,8 +253,8 @@ function TimelineTable({ segments }: { segments: TimelineSegment[] }) {
           <th>Status</th>
           <th>Valid From</th>
           <th>Valid To</th>
-          <th>Txn From</th>
-          <th>Txn To</th>
+          <th>Recorded From</th>
+          <th>Recorded To</th>
           <th>In-Force</th>
           <th>Source</th>
         </tr>

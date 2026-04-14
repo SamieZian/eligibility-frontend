@@ -87,8 +87,8 @@ export function EditEnrollmentModal({ row, onClose }: Props) {
         </div>
 
         <div className={styles.info}>
-          ℹ Plan change is recorded as TERMINATE old (day before) + ADD new on the new effective date.
-          The bitemporal timeline preserves the full history — view it anytime via row → View timeline.
+          Coverage on the current plan ends the day before the new effective date. Past
+          enrollment history stays visible in the member's timeline.
         </div>
 
         <div className={styles.actions}>

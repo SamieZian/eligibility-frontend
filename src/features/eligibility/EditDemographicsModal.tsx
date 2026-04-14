@@ -102,9 +102,8 @@ export function EditDemographicsModal({ row, onClose }: Props) {
         </div>
 
         <div className={styles.info}>
-          ℹ Updates the authoritative member record in <code>member_db</code> and emits
-          <code> MemberUpserted</code>. The projector fans the new name into
-          <code> eligibility_view</code> so the grid refreshes within a few seconds.
+          Changes take effect immediately across all of this member's active and historical
+          enrollments. Past coverage history is preserved.
         </div>
 
         <div className={styles.actions}>

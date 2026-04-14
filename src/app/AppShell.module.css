@@ -207,3 +207,45 @@
   font-size: 12px;
   color: var(--color-accent);
 }
+.techFold {
+  margin-top: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: 0;
+  overflow: hidden;
+}
+.techFold > summary {
+  cursor: pointer;
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  list-style: none;
+  user-select: none;
+}
+.techFold > summary::-webkit-details-marker {
+  display: none;
+}
+.techFold > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform 120ms;
+}
+.techFold[open] > summary::before {
+  transform: rotate(90deg);
+}
+.techFoldBody {
+  padding: 8px 18px 20px;
+  border-top: 1px solid var(--color-border);
+}
+.techLead {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-muted);
+  margin: 12px 0 16px;
+  max-width: 720px;
+}

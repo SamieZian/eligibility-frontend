@@ -79,10 +79,10 @@ export function AppShell() {
           cid: <code>{correlationId || '—'}</code>
         </span>
         <span className={styles.footerLinks}>
-          <a href="http://localhost:4000/graphql" target="_blank" rel="noreferrer">GraphQL</a>
-          <a href="http://localhost:16686" target="_blank" rel="noreferrer">Jaeger</a>
-          <a href="http://localhost:9001" target="_blank" rel="noreferrer">MinIO</a>
-          <a href="http://localhost:9200" target="_blank" rel="noreferrer">OpenSearch</a>
+          <a href="http://localhost:4000/graphql" target="_blank" rel="noreferrer">API</a>
+          <a href="http://localhost:16686" target="_blank" rel="noreferrer">Traces</a>
+          <a href="http://localhost:9001" target="_blank" rel="noreferrer">File storage</a>
+          <a href="http://localhost:9200" target="_blank" rel="noreferrer">Search</a>
         </span>
       </footer>
     </div>
@@ -95,72 +95,94 @@ function AboutPage() {
       <div className={styles.aboutHero}>
         <h1>Eligibility &amp; Enrollment Platform</h1>
         <p className={styles.lead}>
-          A distributed microservices system for healthcare eligibility — ingests ANSI X12{' '}
-          <strong>834</strong> enrollment files, maintains a <strong>bitemporal</strong> coverage
-          timeline, and powers this React console.
+          Manage health-plan enrollments, corrections, and coverage history for employer
+          groups — all from a single console.
         </p>
       </div>
 
       <div className={styles.aboutGrid}>
-        <Card title="Microservices (4 + 3 + 1)">
-          <ul>
-            <li><strong>atlas</strong> — bitemporal enrollment</li>
-            <li><strong>member</strong> — members + dependents (KMS-encrypted SSN)</li>
-            <li><strong>group</strong> — payer / employer / subgroup / plan visibility</li>
-            <li><strong>plan</strong> — plan catalog (Redis cache-aside)</li>
-            <li><strong>bff</strong> — GraphQL gateway + file upload</li>
-            <li><strong>workers</strong> — ingestion / projector / outbox-relay</li>
-            <li><strong>frontend</strong> — this UI</li>
-          </ul>
+        <Card title="Real-time enrollment grid">
+          <p>
+            Search members, filter by group or plan, and see active coverage at a glance.
+            Updates appear as soon as new files are processed.
+          </p>
         </Card>
-        <Card title="Patterns shipped">
-          <ul>
-            <li>Bitemporal model (valid-time + transaction-time)</li>
-            <li>Transactional outbox + Pub/Sub at-least-once</li>
-            <li>CQRS read model — Postgres view + OpenSearch</li>
-            <li>Saga orchestration (REPLACE_FILE workflow)</li>
-            <li>Circuit breakers, retry w/ jitter, DLQs</li>
-            <li>Per-row idempotency on 834 retries</li>
-          </ul>
+        <Card title="Accept 834 &amp; CSV feeds">
+          <p>
+            Drop in an ANSI X12 <strong>834</strong> enrollment file, a CSV, or an Excel
+            export. The system validates, normalizes, and loads every row — with clear
+            error reporting for anything that needs attention.
+          </p>
         </Card>
-        <Card title="Try the demo">
-          <ol>
-            <li>Click <em>Upload</em> → drop in <code>samples/834_sample.x12</code></li>
-            <li>Wait ~10s for the projector to catch up</li>
-            <li>Search "sharma" in the grid</li>
-            <li>Click any row → see the bitemporal timeline</li>
-          </ol>
-        </Card>
-        <Card title="Repos">
-          <ul className={styles.linksList}>
-            <li><a href="https://github.com/SamieZian/eligibility-platform" target="_blank" rel="noreferrer">eligibility-platform (orchestration)</a></li>
-            <li><a href="https://github.com/SamieZian/eligibility-atlas" target="_blank" rel="noreferrer">eligibility-atlas</a></li>
-            <li><a href="https://github.com/SamieZian/eligibility-member" target="_blank" rel="noreferrer">eligibility-member</a></li>
-            <li><a href="https://github.com/SamieZian/eligibility-group" target="_blank" rel="noreferrer">eligibility-group</a></li>
-            <li><a href="https://github.com/SamieZian/eligibility-plan" target="_blank" rel="noreferrer">eligibility-plan</a></li>
-            <li><a href="https://github.com/SamieZian/eligibility-bff" target="_blank" rel="noreferrer">eligibility-bff</a></li>
-            <li><a href="https://github.com/SamieZian/eligibility-workers" target="_blank" rel="noreferrer">eligibility-workers</a></li>
-            <li><a href="https://github.com/SamieZian/eligibility-frontend" target="_blank" rel="noreferrer">eligibility-frontend</a></li>
-          </ul>
-        </Card>
-        <Card title="SLOs">
-          <ul>
-            <li>Search p95 &lt; 300ms · p99 &lt; 800ms</li>
-            <li>834 ingest p95 &lt; 5 min / 100 MB</li>
-            <li>CDC → projection lag p95 &lt; 10s</li>
-            <li>Reconciliation drift &lt; 0.01%</li>
-          </ul>
-        </Card>
-        <Card title="Stack">
-          <ul>
-            <li>React 18 + TS + Vite + TanStack</li>
-            <li>FastAPI + Strawberry GraphQL</li>
-            <li>Postgres 15 (4 DBs, one per service)</li>
-            <li>OpenSearch · Redis · MinIO · Pub/Sub emulator</li>
-            <li>OpenTelemetry → Jaeger · Cloud Run-ready</li>
-          </ul>
+        <Card title="Full coverage history">
+          <p>
+            Every enrollment change is preserved. Open any member to see their timeline of
+            plans, effective dates, and corrections — perfect for audits and disputes.
+          </p>
         </Card>
       </div>
+
+      <details className={styles.techFold}>
+        <summary>Technical Architecture</summary>
+        <div className={styles.techFoldBody}>
+          <p className={styles.techLead}>
+            Under the hood, a distributed microservices system ingests ANSI X12 834 files,
+            maintains a bitemporal coverage timeline, and powers this React console.
+          </p>
+          <div className={styles.aboutGrid}>
+            <Card title="Microservices (4 + 3 + 1)">
+              <ul>
+                <li><strong>atlas</strong> — bitemporal enrollment</li>
+                <li><strong>member</strong> — members + dependents (KMS-encrypted SSN)</li>
+                <li><strong>group</strong> — payer / employer / subgroup / plan visibility</li>
+                <li><strong>plan</strong> — plan catalog (Redis cache-aside)</li>
+                <li><strong>bff</strong> — GraphQL gateway + file upload</li>
+                <li><strong>workers</strong> — ingestion / projector / outbox-relay</li>
+                <li><strong>frontend</strong> — this UI</li>
+              </ul>
+            </Card>
+            <Card title="Patterns shipped">
+              <ul>
+                <li>Bitemporal model (valid-time + transaction-time)</li>
+                <li>Transactional outbox + Pub/Sub at-least-once</li>
+                <li>CQRS read model — Postgres view + OpenSearch</li>
+                <li>Saga orchestration (REPLACE_FILE workflow)</li>
+                <li>Circuit breakers, retry w/ jitter, DLQs</li>
+                <li>Per-row idempotency on 834 retries</li>
+              </ul>
+            </Card>
+            <Card title="SLOs">
+              <ul>
+                <li>Search p95 &lt; 300ms · p99 &lt; 800ms</li>
+                <li>834 ingest p95 &lt; 5 min / 100 MB</li>
+                <li>CDC → projection lag p95 &lt; 10s</li>
+                <li>Reconciliation drift &lt; 0.01%</li>
+              </ul>
+            </Card>
+            <Card title="Stack">
+              <ul>
+                <li>React 18 + TS + Vite + TanStack</li>
+                <li>FastAPI + Strawberry GraphQL</li>
+                <li>Postgres 15 (4 DBs, one per service)</li>
+                <li>OpenSearch · Redis · MinIO · Pub/Sub emulator</li>
+                <li>OpenTelemetry → Jaeger · Cloud Run-ready</li>
+              </ul>
+            </Card>
+            <Card title="Repos">
+              <ul className={styles.linksList}>
+                <li><a href="https://github.com/SamieZian/eligibility-platform" target="_blank" rel="noreferrer">eligibility-platform (orchestration)</a></li>
+                <li><a href="https://github.com/SamieZian/eligibility-atlas" target="_blank" rel="noreferrer">eligibility-atlas</a></li>
+                <li><a href="https://github.com/SamieZian/eligibility-member" target="_blank" rel="noreferrer">eligibility-member</a></li>
+                <li><a href="https://github.com/SamieZian/eligibility-group" target="_blank" rel="noreferrer">eligibility-group</a></li>
+                <li><a href="https://github.com/SamieZian/eligibility-plan" target="_blank" rel="noreferrer">eligibility-plan</a></li>
+                <li><a href="https://github.com/SamieZian/eligibility-bff" target="_blank" rel="noreferrer">eligibility-bff</a></li>
+                <li><a href="https://github.com/SamieZian/eligibility-workers" target="_blank" rel="noreferrer">eligibility-workers</a></li>
+                <li><a href="https://github.com/SamieZian/eligibility-frontend" target="_blank" rel="noreferrer">eligibility-frontend</a></li>
+              </ul>
+            </Card>
+          </div>
+        </div>
+      </details>
     </div>
   );
 }

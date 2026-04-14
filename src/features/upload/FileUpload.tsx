@@ -43,7 +43,7 @@ export function FileUpload() {
   return (
     <div className={styles.wrap}>
       <h1>Upload Eligibility File</h1>
-      <p className={styles.hint}>Accepts .x12 (ANSI 834), .csv, .xlsx. Files stream to MinIO and the ingestion worker consumes them asynchronously.</p>
+      <p className={styles.hint}>Upload an 834 EDI file or CSV. Enrollments appear in the grid once processing completes — usually within a few seconds.</p>
 
       <form
         className={styles.form}
