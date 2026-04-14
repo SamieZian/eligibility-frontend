@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 .header {
   display: flex;
@@ -91,9 +94,13 @@
   flex: 1;
   display: flex;
   min-height: 0;
+  min-width: 0;
   background: var(--color-bg);
 }
-.main > * { flex: 1; }
+.main > * {
+  flex: 1;
+  min-width: 0;
+}
 .footer {
   border-top: 1px solid var(--color-border);
   padding: 6px 20px;

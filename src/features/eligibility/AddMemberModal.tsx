@@ -56,6 +56,7 @@ export function AddMemberModal({ onClose }: Props) {
     if (!form.lastName?.trim()) e.push('Last name is required');
     if (!form.dob) e.push('Date of birth is required');
     if (!form.employerId) e.push('Employer is required');
+    if (!form.subgroupName) e.push('Subgroup is required');
     if (!form.planId) e.push('Plan is required');
     if (!form.effectiveDate) e.push('Effective date is required');
     if (form.ssnLast4 && !/^\d{4}$/.test(form.ssnLast4)) {
@@ -114,7 +115,7 @@ export function AddMemberModal({ onClose }: Props) {
             <input
               value={form.cardNumber ?? ''}
               onChange={(e) => update('cardNumber', e.target.value)}
-              placeholder="auto-assigned if empty"
+              placeholder="leave blank → auto-assigned"
             />
           </Field>
           <Field label="SSN (last 4)">
@@ -151,7 +152,7 @@ export function AddMemberModal({ onClose }: Props) {
               ))}
             </select>
           </Field>
-          <Field label="Subgroup">
+          <Field label="Subgroup *">
             <select
               value={form.subgroupName ?? ''}
               onChange={(e) => update('subgroupName', e.target.value)}
