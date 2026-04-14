@@ -45,6 +45,11 @@
 .chip:hover {
   background: var(--brand-50);
   border-color: var(--brand-200);
+  color: var(--brand-700);
+}
+[data-theme='dark'] .chip:hover {
+  background: rgba(129, 140, 248, 0.14);
+  border-color: var(--color-accent);
   color: var(--color-text);
 }
 .chipActive {
