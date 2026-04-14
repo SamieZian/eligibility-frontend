@@ -7,6 +7,7 @@ export interface Enrollment {
   tenantId: string;
   employerId: string;
   employerName: string | null;
+  subgroupName: string | null;
   planId: string;
   planName: string | null;
   planCode: string | null;

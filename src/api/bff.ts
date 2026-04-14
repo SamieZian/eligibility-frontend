@@ -54,6 +54,7 @@ const SEARCH = gql`
         tenantId
         employerId
         employerName
+        subgroupName
         planId
         planName
         planCode
