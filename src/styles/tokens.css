@@ -1,70 +1,93 @@
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #f7f8fb;
-  --color-surface-hover: #eceff5;
-  --color-text: #1b1f2a;
-  --color-text-muted: #5b6473;
-  --color-border: #d8dbe3;
+  /* Brand */
+  --brand-50:  #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
 
-  --color-accent: #2c5ef5;
-  --color-accent-hover: #214ad0;
+  --color-bg: #f6f7fb;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8fafc;
+  --color-row-hover: rgba(99, 102, 241, 0.04);
+  --color-th-bg: #fafbff;
+  --color-th-fg: #1e293b;
+  --color-text: #0f172a;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --color-accent: var(--brand-600);
+  --color-accent-hover: var(--brand-700);
   --color-accent-contrast: #ffffff;
 
-  --color-danger: #d23f3f;
-  --color-danger-hover: #a82a2a;
-  --color-danger-bg: #fdecec;
-  --color-danger-fg: #7a1d1d;
-  --color-danger-border: #e9a7a7;
+  --color-danger-bg: #fee2e2;
+  --color-danger-fg: #991b1b;
+  --color-danger-border: #fca5a5;
 
-  --color-warn-bg: #fff4dc;
-  --color-warn-fg: #6b4a00;
-  --color-warn-border: #e6c36a;
+  --color-warn-bg: #fef3c7;
+  --color-warn-fg: #92400e;
+  --color-warn-border: #fcd34d;
 
-  --color-info-bg: #e4efff;
-  --color-info-fg: #18407a;
-  --color-info-border: #a5c3f0;
+  --color-success-bg: #dcfce7;
+  --color-success-fg: #166534;
+  --color-success-border: #86efac;
 
-  --color-success: #2f9a5b;
+  --color-info-bg: #dbeafe;
+  --color-info-fg: #1e40af;
+  --color-info-border: #93c5fd;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 8px 32px rgba(15, 23, 42, 0.16);
 
   --radius-sm: 4px;
   --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-
-  --row-h-comfortable: 40px;
-  --row-h-compact: 28px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
 }
 
 [data-theme='dark'] {
-  --color-bg: #0f1320;
-  --color-surface: #181c2c;
-  --color-surface-hover: #222740;
+  --color-bg: #0b0f1a;
+  --color-surface: #141a2b;
+  --color-surface-hover: #1c2238;
+  --color-row-hover: rgba(129, 140, 248, 0.08);
+  --color-th-bg: #1c2238;
+  --color-th-fg: #e2e8f0;
   --color-text: #e6e9f2;
-  --color-text-muted: #8b93a8;
+  --color-muted: #94a3b8;
   --color-border: #2b304a;
+  --color-border-strong: #3e4467;
 
-  --color-accent: #6a8cff;
-  --color-accent-hover: #869fff;
-  --color-accent-contrast: #0f1320;
+  --color-accent: #818cf8;
+  --color-accent-hover: #a5b4fc;
+  --color-accent-contrast: #0b0f1a;
 
-  --color-danger: #e5645e;
-  --color-danger-hover: #d94843;
-  --color-danger-bg: #3a1a1a;
-  --color-danger-fg: #f2b2ae;
-  --color-danger-border: #6a2a29;
+  --color-danger-bg: rgba(239, 68, 68, 0.15);
+  --color-danger-fg: #fca5a5;
+  --color-danger-border: rgba(239, 68, 68, 0.4);
 
-  --color-warn-bg: #3a2f0f;
-  --color-warn-fg: #f2d58c;
-  --color-warn-border: #706023;
+  --color-warn-bg: rgba(245, 158, 11, 0.15);
+  --color-warn-fg: #fcd34d;
+  --color-warn-border: rgba(245, 158, 11, 0.4);
 
-  --color-info-bg: #1a2740;
-  --color-info-fg: #bcd3ff;
-  --color-info-border: #2e4574;
+  --color-success-bg: rgba(34, 197, 94, 0.15);
+  --color-success-fg: #86efac;
+  --color-success-border: rgba(34, 197, 94, 0.4);
+
+  --color-info-bg: rgba(59, 130, 246, 0.18);
+  --color-info-fg: #93c5fd;
+  --color-info-border: rgba(59, 130, 246, 0.4);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
@@ -73,7 +96,7 @@ html, body {
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 14px;
-  height: 100%;
+  min-height: 100%;
 }
 
 #root {
@@ -87,6 +110,16 @@ button { font-family: inherit; }
 input, select, textarea {
   font-family: inherit;
   font-size: 13px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
+input::placeholder { color: var(--color-muted); }
 
-a { color: var(--color-accent); }
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 5px; }
+::-webkit-scrollbar-track { background: transparent; }

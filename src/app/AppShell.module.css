@@ -6,65 +6,197 @@
 .header {
   display: flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
   gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.brandWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+}
+.logo {
+  color: var(--color-accent);
+  font-size: 22px;
+  line-height: 1;
 }
 .brand {
   font-weight: 700;
-  font-size: 15px;
-  margin-right: 12px;
+  font-size: 16px;
+  color: var(--color-text);
+}
+.envBadge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-50);
+  color: var(--brand-700);
+  border: 1px solid var(--brand-200);
+}
+[data-theme='dark'] .envBadge {
+  background: rgba(129, 140, 248, 0.18);
+  color: var(--color-accent);
+  border-color: rgba(129, 140, 248, 0.4);
 }
 .nav {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   flex: 1;
 }
 .navItem {
   background: transparent;
   border: 1px solid transparent;
-  color: var(--color-text);
-  padding: 6px 12px;
-  border-radius: 6px;
+  color: var(--color-muted);
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 120ms;
 }
 .navItem:hover {
   background: var(--color-surface-hover);
+  color: var(--color-text);
 }
 .navItemActive {
-  background: var(--color-surface-hover);
-  border-color: var(--color-border);
+  background: var(--brand-50);
+  color: var(--brand-700);
   font-weight: 600;
 }
+[data-theme='dark'] .navItemActive {
+  background: rgba(129, 140, 248, 0.18);
+  color: var(--color-accent);
+}
 .themeBtn {
-  background: transparent;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 12px;
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: 14px;
   cursor: pointer;
   color: var(--color-text);
+  transition: all 120ms;
+}
+.themeBtn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
 }
 .main {
   flex: 1;
   display: flex;
   min-height: 0;
+  background: var(--color-bg);
 }
+.main > * { flex: 1; }
 .footer {
   border-top: 1px solid var(--color-border);
-  padding: 4px 16px;
+  padding: 6px 20px;
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--color-muted);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   background: var(--color-surface);
 }
 .footerCid {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+.footerCid code {
+  background: var(--color-surface-hover);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+.footerLinks {
+  display: flex;
+  gap: 12px;
+}
+.footerLinks a {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.footerLinks a:hover {
+  color: var(--color-accent);
+}
+
+/* ── About page ─────────────────────────────────────────────── */
 .about {
-  padding: 24px;
+  padding: 32px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.aboutHero {
+  margin-bottom: 32px;
+}
+.aboutHero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+.lead {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-muted);
+  margin: 0;
   max-width: 720px;
+}
+.lead strong { color: var(--color-text); }
+.aboutGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.aboutCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 120ms, box-shadow 120ms;
+}
+.aboutCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.aboutCard h2 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  margin: 0 0 12px;
+}
+.aboutCard ul,
+.aboutCard ol {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+.aboutCard code {
+  background: var(--color-surface-hover);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.linksList {
+  list-style: none !important;
+  padding: 0 !important;
+}
+.linksList li {
+  padding: 2px 0;
+}
+.linksList a {
+  font-size: 12px;
+  color: var(--color-accent);
 }

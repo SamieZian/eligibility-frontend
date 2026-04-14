@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { searchEnrollments } from '../../api/bff';
 import type { Enrollment, SearchFilter, SortOrder } from '../../api/types';
 import { useLocalStorage } from '../../lib/useLocalStorage';
@@ -50,14 +50,34 @@ const DEFAULT_VISIBLE: ColumnKey[] = ALL_COLUMNS.map((c) => c.key);
 
 type ClientSort = { key: keyof Enrollment; dir: 'asc' | 'desc' } | null;
 
+// Friendly labels for the active-filter chip strip
+const FILTER_LABELS: Partial<Record<keyof SearchFilter, string>> = {
+  cardNumber: 'Member ID',
+  firstName: 'First',
+  lastName: 'Last',
+  ssnLast4: 'SSN',
+  employerName: 'Employer',
+  subgroupName: 'Subgroup',
+  planName: 'Plan',
+  planCode: 'Plan code',
+  dob: 'DOB',
+  effectiveDateFrom: 'Eff ≥',
+  effectiveDateTo: 'Eff ≤',
+  terminationDateFrom: 'Term ≥',
+  terminationDateTo: 'Term ≤',
+  memberType: 'Type',
+  status: 'Status',
+};
+
 export function Grid() {
   const [filter, setFilter] = useState<SearchFilter>({});
   const [statusChips, setStatusChips] = useState<string[]>(['active', 'pending']);
   const [columnFilters, setColumnFilters] = useState<Partial<Record<keyof Enrollment, string>>>({});
+  const [openColFilter, setOpenColFilter] = useState<string | null>(null);
   const [quickQuery, setQuickQuery] = useState('');
   const debouncedQ = useDebounce(quickQuery, 250);
   const [cursor, setCursor] = useState<string | null>(null);
-  const [serverSort, setServerSort] = useState<SortOrder>('effective_date_desc');
+  const [serverSort] = useState<SortOrder>('effective_date_desc');
   const [clientSort, setClientSort] = useState<ClientSort>(null);
   const [pageSize, setPageSize] = useLocalStorage<number>('bff.grid.pageSize', 50);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -70,10 +90,7 @@ export function Grid() {
   );
 
   const effectiveFilter: SearchFilter = useMemo(
-    () => ({
-      ...filter,
-      q: debouncedQ || filter.q || null,
-    }),
+    () => ({ ...filter, q: debouncedQ || filter.q || null }),
     [filter, debouncedQ],
   );
 
@@ -122,7 +139,17 @@ export function Grid() {
     });
   };
 
+  const removeFilter = (key: keyof SearchFilter) =>
+    setFilter((prev) => {
+      const { [key]: _drop, ...rest } = prev;
+      return rest;
+    });
+
   const visibleCols = ALL_COLUMNS.filter((c) => visible.includes(c.key));
+
+  // Active-filter chips (from the AdvancedSearchModal output)
+  const activeFilters = (Object.entries(filter) as [keyof SearchFilter, unknown][])
+    .filter(([k, v]) => v !== undefined && v !== null && v !== '' && FILTER_LABELS[k]);
 
   return (
     <div className={styles.wrap} data-density={density}>
@@ -148,7 +175,7 @@ export function Grid() {
         <input
           className={styles.search}
           aria-label="Quick search"
-          placeholder="Search by Member Name, Member ID Card…"
+          placeholder="🔍  Search by Member Name, Member ID Card…"
           value={quickQuery}
           onChange={(e) => {
             setQuickQuery(e.target.value);
@@ -158,19 +185,21 @@ export function Grid() {
         <Button onClick={() => setAdvancedOpen(true)}>▾ Advanced Search</Button>
         <SavedViews currentFilter={filter} onApply={applyFilter} />
         <div className={styles.spacer} />
-        <Button variant="primary" onClick={() => alert('Add Member: coming soon — wire to member svc POST /members')}>
+        <Button variant="primary" onClick={() => alert('Add Member: would open a form posting to /members on the member service.')}>
           + Add New Member
         </Button>
-        <select
-          aria-label="Density"
-          value={density}
-          onChange={(e) => setDensity(e.target.value as 'comfortable' | 'compact')}
-        >
-          <option value="comfortable">Comfortable</option>
-          <option value="compact">Compact</option>
-        </select>
+        <div className={styles.densityWrap}>
+          <button
+            type="button"
+            className={styles.iconBtn}
+            title={density === 'comfortable' ? 'Switch to compact' : 'Switch to comfortable'}
+            onClick={() => setDensity(density === 'comfortable' ? 'compact' : 'comfortable')}
+          >
+            {density === 'comfortable' ? '☰' : '≡'}
+          </button>
+        </div>
         <details className={styles.colMenu}>
-          <summary>Columns</summary>
+          <summary>Columns ▾</summary>
           <ul>
             {ALL_COLUMNS.filter((c) => c.key !== 'actions').map((c) => (
               <li key={c.key}>
@@ -188,6 +217,33 @@ export function Grid() {
         </details>
       </div>
 
+      {/* ── Active filter chips (from Advanced Search) ────── */}
+      {activeFilters.length > 0 && (
+        <div className={styles.activeFilters}>
+          <span className={styles.activeFiltersLabel}>Filters:</span>
+          {activeFilters.map(([k, v]) => (
+            <span key={String(k)} className={styles.activeFilterChip}>
+              <strong>{FILTER_LABELS[k]}</strong>: {String(v)}
+              <button
+                type="button"
+                aria-label={`Remove ${FILTER_LABELS[k]}`}
+                className={styles.chipX}
+                onClick={() => removeFilter(k)}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          <button
+            type="button"
+            className={styles.clearAll}
+            onClick={() => setFilter({})}
+          >
+            Clear all
+          </button>
+        </div>
+      )}
+
       {isLoading && <Spinner />}
       {error && (
         <div role="alert" className={styles.error}>
@@ -202,43 +258,36 @@ export function Grid() {
             <tr>
               {visibleCols.map((c) => (
                 <th key={String(c.key)} scope="col" style={c.width ? { width: c.width } : undefined}>
-                  <div className={styles.th}>
-                    <span>{c.label}</span>
+                  <div className={styles.thInline}>
+                    <span className={styles.thLabel}>{c.label}</span>
                     {c.sortable && (
                       <button
                         type="button"
-                        className={styles.sortBtn}
+                        className={styles.iconBtn}
                         aria-label={`Sort by ${c.label}`}
                         onClick={() => cycleSort(c.key as keyof Enrollment)}
+                        title="Sort"
                       >
                         {clientSort?.key === c.key
                           ? clientSort.dir === 'asc'
                             ? '↑'
                             : '↓'
-                          : '↕'}
+                          : '⇅'}
                       </button>
                     )}
                     {c.filterable && (
-                      <input
-                        type={c.filterable === 'text' ? 'search' : 'text'}
-                        list={c.filterable === 'select' ? `opts-${String(c.key)}` : undefined}
-                        className={styles.colFilter}
-                        placeholder="filter…"
+                      <ColumnFilterTrigger
+                        colKey={String(c.key)}
                         value={columnFilters[c.key as keyof Enrollment] ?? ''}
-                        onChange={(e) =>
-                          setColumnFilters((prev) => ({
-                            ...prev,
-                            [c.key]: e.target.value,
-                          }))
+                        options={c.options}
+                        type={c.filterable}
+                        open={openColFilter === String(c.key)}
+                        onOpen={(k) => setOpenColFilter(openColFilter === k ? null : k)}
+                        onChange={(v) =>
+                          setColumnFilters((prev) => ({ ...prev, [c.key]: v }))
                         }
+                        active={!!columnFilters[c.key as keyof Enrollment]}
                       />
-                    )}
-                    {c.filterable === 'select' && c.options && (
-                      <datalist id={`opts-${String(c.key)}`}>
-                        {c.options.map((o) => (
-                          <option key={o} value={o} />
-                        ))}
-                      </datalist>
                     )}
                   </div>
                 </th>
@@ -289,6 +338,7 @@ export function Grid() {
               setPageSize(Number(e.target.value));
               setCursor(null);
             }}
+            className={styles.pageSizeSelect}
           >
             <option value={25}>25 / page</option>
             <option value={50}>50 / page</option>
@@ -310,6 +360,64 @@ export function Grid() {
 
       {drawerMemberId && (
         <MemberDetail memberId={drawerMemberId} onClose={() => setDrawerMemberId(null)} />
+      )}
+    </div>
+  );
+}
+
+interface ColFilterProps {
+  colKey: string;
+  value: string;
+  options?: string[];
+  type: 'text' | 'select';
+  open: boolean;
+  active: boolean;
+  onOpen: (k: string) => void;
+  onChange: (v: string) => void;
+}
+
+function ColumnFilterTrigger({ colKey, value, options, type, open, active, onOpen, onChange }: ColFilterProps) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  return (
+    <div className={styles.filterWrap} ref={wrapRef}>
+      <button
+        type="button"
+        className={`${styles.iconBtn} ${active ? styles.iconBtnActive : ''}`}
+        title="Filter"
+        onClick={() => onOpen(colKey)}
+        aria-label={`Filter ${colKey}`}
+      >
+        ⌕
+      </button>
+      {open && (
+        <div className={styles.filterPopover} onClick={(e) => e.stopPropagation()}>
+          {type === 'select' && options ? (
+            <select
+              autoFocus
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className={styles.filterSelect}
+            >
+              {options.map((o) => (
+                <option key={o} value={o}>{o || '(any)'}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              autoFocus
+              type="search"
+              placeholder="Type to filter…"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className={styles.filterInput}
+            />
+          )}
+          {value && (
+            <button type="button" className={styles.filterClear} onClick={() => onChange('')}>
+              clear
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -340,7 +448,7 @@ function renderCell(
         {open && (
           <div className={cellStyles.actionMenu} onClick={(e) => e.stopPropagation()}>
             <button type="button" onClick={() => { openDrawer(row.memberId); setActionsFor(null); }}>
-              View Member
+              View timeline
             </button>
             <button type="button" onClick={() => alert('Terminate flow — wire to atlas terminateEnrollment')}>
               Terminate
@@ -385,12 +493,10 @@ function renderCell(
   }
   const v = (row as unknown as Record<string, unknown>)[key];
   if (v == null) return '—';
-  // Hide sentinel "9999-12-31"
   if (key === 'terminationDate' && v === '9999-12-31') return '—';
   return String(v);
 }
 
-// Inline styles for cell renderers (small enough to not need a module CSS)
 const cellStyles = {
   link: 'cell-link',
   chip: 'cell-chip',
