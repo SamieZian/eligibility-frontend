@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { searchEnrollments } from '../../api/bff';
 import type { Enrollment, SearchFilter, SortOrder } from '../../api/types';
 import { useLocalStorage } from '../../lib/useLocalStorage';
 import { useDebounce } from '../../lib/useDebounce';
+import { useClickOutside } from '../../lib/useClickOutside';
 import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
 import { AdvancedSearchModal } from './AdvancedSearchModal';
@@ -83,6 +84,8 @@ export function Grid() {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [drawerMemberId, setDrawerMemberId] = useState<string | null>(null);
   const [actionsFor, setActionsFor] = useState<string | null>(null);
+  const [colsMenuOpen, setColsMenuOpen] = useState(false);
+  const colsMenuRef = useClickOutside<HTMLDivElement>(colsMenuOpen, () => setColsMenuOpen(false));
   const [visible, setVisible] = useLocalStorage<ColumnKey[]>('bff.grid.columns', DEFAULT_VISIBLE);
   const [density, setDensity] = useLocalStorage<'comfortable' | 'compact'>(
     'bff.grid.density',
@@ -198,23 +201,33 @@ export function Grid() {
             {density === 'comfortable' ? '☰' : '≡'}
           </button>
         </div>
-        <details className={styles.colMenu}>
-          <summary>Columns ▾</summary>
-          <ul>
-            {ALL_COLUMNS.filter((c) => c.key !== 'actions').map((c) => (
-              <li key={c.key}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={visible.includes(c.key)}
-                    onChange={() => toggleColumn(c.key)}
-                  />
-                  {c.label}
-                </label>
-              </li>
-            ))}
-          </ul>
-        </details>
+        <div className={styles.colMenu} ref={colsMenuRef}>
+          <button
+            type="button"
+            className={styles.colMenuTrigger}
+            onClick={() => setColsMenuOpen(!colsMenuOpen)}
+            aria-haspopup="menu"
+            aria-expanded={colsMenuOpen}
+          >
+            Columns ▾
+          </button>
+          {colsMenuOpen && (
+            <ul role="menu">
+              {ALL_COLUMNS.filter((c) => c.key !== 'actions').map((c) => (
+                <li key={c.key}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={visible.includes(c.key)}
+                      onChange={() => toggleColumn(c.key)}
+                    />
+                    {c.label}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* ── Active filter chips (from Advanced Search) ────── */}
@@ -283,6 +296,7 @@ export function Grid() {
                         type={c.filterable}
                         open={openColFilter === String(c.key)}
                         onOpen={(k) => setOpenColFilter(openColFilter === k ? null : k)}
+                        onClose={() => setOpenColFilter(null)}
                         onChange={(v) =>
                           setColumnFilters((prev) => ({ ...prev, [c.key]: v }))
                         }
@@ -373,11 +387,13 @@ interface ColFilterProps {
   open: boolean;
   active: boolean;
   onOpen: (k: string) => void;
+  onClose: () => void;
   onChange: (v: string) => void;
 }
 
-function ColumnFilterTrigger({ colKey, value, options, type, open, active, onOpen, onChange }: ColFilterProps) {
-  const wrapRef = useRef<HTMLDivElement>(null);
+function ColumnFilterTrigger({ colKey, value, options, type, open, active, onOpen, onClose, onChange }: ColFilterProps) {
+  const handleOutside = useCallback(() => onClose(), [onClose]);
+  const wrapRef = useClickOutside<HTMLDivElement>(open, handleOutside);
   return (
     <div className={styles.filterWrap} ref={wrapRef}>
       <button
@@ -423,6 +439,50 @@ function ColumnFilterTrigger({ colKey, value, options, type, open, active, onOpe
   );
 }
 
+function ActionsCell({
+  row,
+  openDrawer,
+  actionsFor,
+  setActionsFor,
+}: {
+  row: Enrollment;
+  openDrawer: (memberId: string) => void;
+  actionsFor: string | null;
+  setActionsFor: (id: string | null) => void;
+}) {
+  const open = actionsFor === row.enrollmentId;
+  const handleClose = useCallback(() => setActionsFor(null), [setActionsFor]);
+  const ref = useClickOutside<HTMLDivElement>(open, handleClose);
+  return (
+    <div style={{ position: 'relative' }} ref={ref}>
+      <button
+        type="button"
+        aria-label="Row actions"
+        className={cellStyles.actionBtn}
+        onClick={(e) => {
+          e.stopPropagation();
+          setActionsFor(open ? null : row.enrollmentId);
+        }}
+      >
+        ☰
+      </button>
+      {open && (
+        <div className={cellStyles.actionMenu} role="menu">
+          <button type="button" onClick={() => { openDrawer(row.memberId); setActionsFor(null); }}>
+            View timeline
+          </button>
+          <button type="button" onClick={() => { alert('Terminate flow — wire to atlas terminateEnrollment'); setActionsFor(null); }}>
+            Terminate
+          </button>
+          <button type="button" onClick={() => { alert('Edit flow — would open AddDependent / change plan modal'); setActionsFor(null); }}>
+            Edit
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function renderCell(
   row: Enrollment,
   key: ColumnKey,
@@ -431,34 +491,13 @@ function renderCell(
   setActionsFor: (id: string | null) => void,
 ): React.ReactNode {
   if (key === 'actions') {
-    const open = actionsFor === row.enrollmentId;
     return (
-      <div style={{ position: 'relative' }}>
-        <button
-          type="button"
-          aria-label="Row actions"
-          className={cellStyles.actionBtn}
-          onClick={(e) => {
-            e.stopPropagation();
-            setActionsFor(open ? null : row.enrollmentId);
-          }}
-        >
-          ☰
-        </button>
-        {open && (
-          <div className={cellStyles.actionMenu} onClick={(e) => e.stopPropagation()}>
-            <button type="button" onClick={() => { openDrawer(row.memberId); setActionsFor(null); }}>
-              View timeline
-            </button>
-            <button type="button" onClick={() => alert('Terminate flow — wire to atlas terminateEnrollment')}>
-              Terminate
-            </button>
-            <button type="button" onClick={() => alert('Edit flow — would open AddDependent / change plan modal')}>
-              Edit
-            </button>
-          </div>
-        )}
-      </div>
+      <ActionsCell
+        row={row}
+        openDrawer={openDrawer}
+        actionsFor={actionsFor}
+        setActionsFor={setActionsFor}
+      />
     );
   }
   if (key === 'memberName') {

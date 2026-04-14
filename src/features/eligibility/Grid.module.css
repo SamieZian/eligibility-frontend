@@ -116,17 +116,21 @@
 .colMenu {
   position: relative;
 }
-.colMenu > summary {
+.colMenuTrigger {
   cursor: pointer;
-  list-style: none;
   padding: 6px 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 13px;
   color: var(--color-muted);
   background: var(--color-surface);
+  font-family: inherit;
 }
-.colMenu > summary::-webkit-details-marker { display: none; }
+.colMenuTrigger:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
 .colMenu ul {
   position: absolute;
   right: 0;

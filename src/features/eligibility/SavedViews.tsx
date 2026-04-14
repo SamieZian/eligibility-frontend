@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { SearchFilter } from '../../api/types';
 import { useLocalStorage } from '../../lib/useLocalStorage';
+import { useClickOutside } from '../../lib/useClickOutside';
 import { Button } from '../../components/Button';
+import styles from './SavedViews.module.css';
 
 interface Saved {
   name: string;
@@ -18,11 +20,14 @@ export function SavedViews({ currentFilter, onApply }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
 
+  // Close on outside click + Escape
+  const wrapRef = useClickOutside<HTMLDivElement>(open, () => setOpen(false));
+
   function save() {
-    if (!name.trim()) return;
-    setViews([...views.filter((v) => v.name !== name), { name, filter: currentFilter }]);
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setViews([...views.filter((v) => v.name !== trimmed), { name: trimmed, filter: currentFilter }]);
     setName('');
-    setOpen(false);
   }
 
   function remove(n: string) {
@@ -30,56 +35,36 @@ export function SavedViews({ currentFilter, onApply }: Props) {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
-      <Button variant="secondary" onClick={() => setOpen(!open)}>
-        Saved Views {views.length ? `(${views.length})` : ''}
+    <div className={styles.wrap} ref={wrapRef}>
+      <Button variant="secondary" onClick={() => setOpen(!open)} aria-haspopup="menu" aria-expanded={open}>
+        Saved Views{views.length ? ` (${views.length})` : ''} ▾
       </Button>
       {open && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            zIndex: 5,
-            background: 'var(--color-surface, #fff)',
-            border: '1px solid var(--color-border, #d0d0d0)',
-            borderRadius: 6,
-            padding: 8,
-            minWidth: 260,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-          }}
-        >
-          <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+        <div className={styles.panel} role="menu">
+          <div className={styles.row}>
             <input
               placeholder="Save current as…"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={{ flex: 1, padding: '4px 6px' }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  save();
+                }
+              }}
+              className={styles.input}
             />
-            <Button onClick={save}>Save</Button>
+            <Button onClick={save} disabled={!name.trim()}>Save</Button>
           </div>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          <ul className={styles.list}>
             {views.map((v) => (
-              <li
-                key={v.name}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '4px 0',
-                }}
-              >
+              <li key={v.name} className={styles.item}>
                 <button
                   type="button"
+                  className={styles.itemBtn}
                   onClick={() => {
                     onApply(v.filter);
                     setOpen(false);
-                  }}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'inherit',
                   }}
                 >
                   {v.name}
@@ -88,13 +73,13 @@ export function SavedViews({ currentFilter, onApply }: Props) {
                   type="button"
                   onClick={() => remove(v.name)}
                   aria-label={`Delete ${v.name}`}
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+                  className={styles.deleteBtn}
                 >
-                  ✕
+                  ×
                 </button>
               </li>
             ))}
-            {views.length === 0 && <li style={{ color: '#888' }}>No saved views yet</li>}
+            {views.length === 0 && <li className={styles.empty}>No saved views yet</li>}
           </ul>
         </div>
       )}
