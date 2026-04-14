@@ -58,6 +58,14 @@ export interface EmployerSummary {
   payerId: string | null;
 }
 
+export interface PlanSummary {
+  id: string;
+  planCode: string;
+  name: string;
+  type: string;
+  metalLevel: string | null;
+}
+
 export interface SearchResult {
   items: Enrollment[];
   total: number;
@@ -94,4 +102,24 @@ export interface UploadResponse {
   file_id: string;
   job_id: string;
   status: string;
+}
+
+export interface AddMemberInput {
+  firstName: string;
+  lastName: string;
+  dob: string;
+  gender?: string | null;
+  cardNumber?: string | null;
+  ssnLast4?: string | null;
+  employerId: string;
+  subgroupName?: string | null;
+  planId: string;
+  relationship?: string;
+  effectiveDate: string;
+}
+
+export interface AddMemberResult {
+  memberId: string;
+  enrollmentId: string;
+  memberName: string;
 }

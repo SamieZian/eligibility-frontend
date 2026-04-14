@@ -1,9 +1,12 @@
 import { GraphQLClient, gql } from 'graphql-request';
 import type {
+  AddMemberInput,
+  AddMemberResult,
   EmployerSummary,
   Enrollment,
   FileJob,
   Page,
+  PlanSummary,
   SearchFilter,
   SearchResult,
   TimelineSegment,
@@ -142,6 +145,18 @@ const EMPLOYERS = gql`
   }
 `;
 
+const PLANS_QUERY = gql`
+  query Plans {
+    plans {
+      id
+      planCode
+      name
+      type
+      metalLevel
+    }
+  }
+`;
+
 const TERMINATE = gql`
   mutation Terminate($memberId: ID!, $planId: ID!, $validTo: Date!) {
     terminateEnrollment(memberId: $memberId, planId: $planId, validTo: $validTo)
@@ -151,6 +166,16 @@ const TERMINATE = gql`
 const REPLAY = gql`
   mutation Replay($fileId: ID!) {
     replayFile(fileId: $fileId)
+  }
+`;
+
+const ADD_MEMBER = gql`
+  mutation AddMember($input: AddMemberInput!) {
+    addMember(input: $input) {
+      memberId
+      enrollmentId
+      memberName
+    }
   }
 `;
 
@@ -187,6 +212,11 @@ export async function employers(search?: string): Promise<EmployerSummary[]> {
   return employers;
 }
 
+export async function plans(): Promise<PlanSummary[]> {
+  const { plans } = await client().request<{ plans: PlanSummary[] }>(PLANS_QUERY);
+  return plans;
+}
+
 export async function terminateEnrollment(
   memberId: string,
   planId: string,
@@ -203,6 +233,11 @@ export async function terminateEnrollment(
 export async function replayFile(fileId: string): Promise<boolean> {
   const { replayFile } = await client().request<{ replayFile: boolean }>(REPLAY, { fileId });
   return replayFile;
+}
+
+export async function addMember(input: AddMemberInput): Promise<AddMemberResult> {
+  const { addMember } = await client().request<{ addMember: AddMemberResult }>(ADD_MEMBER, { input });
+  return addMember;
 }
 
 export async function uploadFile(file: File): Promise<UploadResponse> {

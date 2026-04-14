@@ -8,6 +8,7 @@ import { useClickOutside } from '../../lib/useClickOutside';
 import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
 import { AdvancedSearchModal } from './AdvancedSearchModal';
+import { AddMemberModal } from './AddMemberModal';
 import { SavedViews } from './SavedViews';
 import { MemberDetail } from '../member/Detail';
 import styles from './Grid.module.css';
@@ -80,8 +81,9 @@ export function Grid() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [serverSort] = useState<SortOrder>('effective_date_desc');
   const [clientSort, setClientSort] = useState<ClientSort>(null);
-  const [pageSize, setPageSize] = useLocalStorage<number>('bff.grid.pageSize', 50);
+  const [pageSize, setPageSize] = useLocalStorage<number>('bff.grid.pageSize', 10);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [drawerMemberId, setDrawerMemberId] = useState<string | null>(null);
   const [actionsFor, setActionsFor] = useState<string | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
@@ -188,7 +190,7 @@ export function Grid() {
         <Button onClick={() => setAdvancedOpen(true)}>▾ Advanced Search</Button>
         <SavedViews currentFilter={filter} onApply={applyFilter} />
         <div className={styles.spacer} />
-        <Button variant="primary" onClick={() => alert('Add Member: would open a form posting to /members on the member service.')}>
+        <Button variant="primary" onClick={() => setAddOpen(true)}>
           + Add New Member
         </Button>
         <div className={styles.densityWrap}>
@@ -354,6 +356,7 @@ export function Grid() {
             }}
             className={styles.pageSizeSelect}
           >
+            <option value={10}>10 / page</option>
             <option value={25}>25 / page</option>
             <option value={50}>50 / page</option>
             <option value={100}>100 / page</option>
@@ -371,6 +374,8 @@ export function Grid() {
           }}
         />
       )}
+
+      {addOpen && <AddMemberModal onClose={() => setAddOpen(false)} />}
 
       {drawerMemberId && (
         <MemberDetail memberId={drawerMemberId} onClose={() => setDrawerMemberId(null)} />
