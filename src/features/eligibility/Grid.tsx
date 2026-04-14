@@ -76,7 +76,9 @@ const FILTER_LABELS: Partial<Record<keyof SearchFilter, string>> = {
 
 export function Grid() {
   const [filter, setFilter] = useState<SearchFilter>({});
-  const [statusChips, setStatusChips] = useState<string[]>(['active', 'pending']);
+  // Single-select status chip — pushed into the server filter so pagination
+  // respects it. `null` means "show all statuses".
+  const [statusChip, setStatusChip] = useState<string | null>('active');
   const [columnFilters, setColumnFilters] = useState<Partial<Record<keyof Enrollment, string>>>({});
   const [openColFilter, setOpenColFilter] = useState<string | null>(null);
   const [quickQuery, setQuickQuery] = useState('');
@@ -101,8 +103,12 @@ export function Grid() {
   );
 
   const effectiveFilter: SearchFilter = useMemo(
-    () => ({ ...filter, q: debouncedQ || filter.q || null }),
-    [filter, debouncedQ],
+    () => ({
+      ...filter,
+      q: debouncedQ || filter.q || null,
+      status: statusChip ?? filter.status ?? null,
+    }),
+    [filter, debouncedQ, statusChip],
   );
 
   const { data, isLoading, isFetching, error } = useQuery({
@@ -111,11 +117,11 @@ export function Grid() {
     placeholderData: (prev) => prev,
   });
 
-  // Apply status chips + per-column filters + client-side sort to the rows.
+  // Status filter is server-side (via effectiveFilter.status above). Per-column
+  // filters + client-side sort run on the current page only.
   const items = useMemo(() => {
     const all = data?.items ?? [];
     return all
-      .filter((row) => statusChips.length === 0 || statusChips.includes(row.status))
       .filter((row) =>
         Object.entries(columnFilters).every(([key, value]) => {
           if (!value) return true;
@@ -129,7 +135,7 @@ export function Grid() {
         const bv = String(b[clientSort.key] ?? '');
         return clientSort.dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
       });
-  }, [data, statusChips, columnFilters, clientSort]);
+  }, [data, columnFilters, clientSort]);
 
   const toggleColumn = (key: ColumnKey) =>
     setVisible((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
@@ -139,8 +145,10 @@ export function Grid() {
     setCursor(null);
   };
 
-  const toggleStatus = (s: string) =>
-    setStatusChips((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+  const toggleStatus = (s: string) => {
+    setStatusChip((prev) => (prev === s ? null : s));
+    setCursor(null);
+  };
 
   const cycleSort = (key: keyof Enrollment) => {
     setClientSort((prev) => {
@@ -168,7 +176,7 @@ export function Grid() {
       <div className={styles.toolbar}>
         <div className={styles.chips}>
           {STATUS_CHIPS.map((s) => {
-            const active = statusChips.includes(s.value);
+            const active = statusChip === s.value;
             return (
               <button
                 key={s.value}
