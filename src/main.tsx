@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppShell } from './app/AppShell';
 import { GlobalStatusProvider } from './app/GlobalStatus';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ToastProvider } from './components/Toast';
 import { RouterProvider } from './lib/router';
 import './styles/tokens.css';
 
@@ -24,11 +25,13 @@ ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <GlobalStatusProvider>
-          <RouterProvider>
-            <AppShell />
-          </RouterProvider>
-        </GlobalStatusProvider>
+        <ToastProvider>
+          <GlobalStatusProvider>
+            <RouterProvider>
+              <AppShell />
+            </RouterProvider>
+          </GlobalStatusProvider>
+        </ToastProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>,

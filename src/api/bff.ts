@@ -182,6 +182,26 @@ const ADD_MEMBER = gql`
   }
 `;
 
+const CHANGE_PLAN = gql`
+  mutation ChangePlan(
+    $memberId: ID!
+    $oldPlanId: ID!
+    $newPlanId: ID!
+    $employerId: ID!
+    $newValidFrom: Date!
+    $relationship: String
+  ) {
+    changeEnrollmentPlan(
+      memberId: $memberId
+      oldPlanId: $oldPlanId
+      newPlanId: $newPlanId
+      employerId: $employerId
+      newValidFrom: $newValidFrom
+      relationship: $relationship
+    )
+  }
+`;
+
 const GROUP_ADMIN = gql`
   query GroupAdmin {
     payers { id name }
@@ -275,6 +295,21 @@ export async function replayFile(fileId: string): Promise<boolean> {
 export async function addMember(input: AddMemberInput): Promise<AddMemberResult> {
   const { addMember } = await client().request<{ addMember: AddMemberResult }>(ADD_MEMBER, { input });
   return addMember;
+}
+
+export interface ChangePlanInput {
+  memberId: string;
+  oldPlanId: string;
+  newPlanId: string;
+  employerId: string;
+  newValidFrom: string;
+  relationship?: string;
+}
+export async function changeEnrollmentPlan(input: ChangePlanInput): Promise<string> {
+  const { changeEnrollmentPlan } = await client().request<{ changeEnrollmentPlan: string }>(
+    CHANGE_PLAN, { ...input } as Record<string, unknown>,
+  );
+  return changeEnrollmentPlan;
 }
 
 export interface GroupAdminBundle {

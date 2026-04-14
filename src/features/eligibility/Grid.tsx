@@ -9,6 +9,8 @@ import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
 import { AdvancedSearchModal } from './AdvancedSearchModal';
 import { AddMemberModal } from './AddMemberModal';
+import { TerminateModal } from './TerminateModal';
+import { EditEnrollmentModal } from './EditEnrollmentModal';
 import { SavedViews } from './SavedViews';
 import { MemberDetail } from '../member/Detail';
 import styles from './Grid.module.css';
@@ -85,6 +87,8 @@ export function Grid() {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [drawerMemberId, setDrawerMemberId] = useState<string | null>(null);
+  const [terminateRow, setTerminateRow] = useState<Enrollment | null>(null);
+  const [editRow, setEditRow] = useState<Enrollment | null>(null);
   const [actionsFor, setActionsFor] = useState<string | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
   const colsMenuRef = useClickOutside<HTMLDivElement>(colsMenuOpen, () => setColsMenuOpen(false));
@@ -314,7 +318,7 @@ export function Grid() {
             {items.map((row) => (
               <tr key={row.enrollmentId}>
                 {visibleCols.map((c) => (
-                  <td key={String(c.key)}>{renderCell(row, c.key, setDrawerMemberId, actionsFor, setActionsFor)}</td>
+                  <td key={String(c.key)}>{renderCell(row, c.key, setDrawerMemberId, actionsFor, setActionsFor, setTerminateRow, setEditRow)}</td>
                 ))}
               </tr>
             ))}
@@ -376,6 +380,12 @@ export function Grid() {
       )}
 
       {addOpen && <AddMemberModal onClose={() => setAddOpen(false)} />}
+
+      {terminateRow && (
+        <TerminateModal row={terminateRow} onClose={() => setTerminateRow(null)} />
+      )}
+
+      {editRow && <EditEnrollmentModal row={editRow} onClose={() => setEditRow(null)} />}
 
       {drawerMemberId && (
         <MemberDetail memberId={drawerMemberId} onClose={() => setDrawerMemberId(null)} />
@@ -449,15 +459,20 @@ function ActionsCell({
   openDrawer,
   actionsFor,
   setActionsFor,
+  onTerminate,
+  onEdit,
 }: {
   row: Enrollment;
   openDrawer: (memberId: string) => void;
   actionsFor: string | null;
   setActionsFor: (id: string | null) => void;
+  onTerminate: (row: Enrollment) => void;
+  onEdit: (row: Enrollment) => void;
 }) {
   const open = actionsFor === row.enrollmentId;
   const handleClose = useCallback(() => setActionsFor(null), [setActionsFor]);
   const ref = useClickOutside<HTMLDivElement>(open, handleClose);
+  const isTermed = row.status === 'termed';
   return (
     <div style={{ position: 'relative' }} ref={ref}>
       <button
@@ -476,11 +491,21 @@ function ActionsCell({
           <button type="button" onClick={() => { openDrawer(row.memberId); setActionsFor(null); }}>
             View timeline
           </button>
-          <button type="button" onClick={() => { alert('Terminate flow — wire to atlas terminateEnrollment'); setActionsFor(null); }}>
+          <button
+            type="button"
+            disabled={isTermed}
+            title={isTermed ? 'Already terminated' : 'Terminate this enrollment'}
+            onClick={() => { onTerminate(row); setActionsFor(null); }}
+          >
             Terminate
           </button>
-          <button type="button" onClick={() => { alert('Edit flow — would open AddDependent / change plan modal'); setActionsFor(null); }}>
-            Edit
+          <button
+            type="button"
+            disabled={isTermed}
+            title={isTermed ? 'Cannot edit a terminated enrollment' : 'Change plan'}
+            onClick={() => { onEdit(row); setActionsFor(null); }}
+          >
+            Change plan
           </button>
         </div>
       )}
@@ -494,6 +519,8 @@ function renderCell(
   openDrawer: (memberId: string) => void,
   actionsFor: string | null,
   setActionsFor: (id: string | null) => void,
+  onTerminate: (row: Enrollment) => void,
+  onEdit: (row: Enrollment) => void,
 ): React.ReactNode {
   if (key === 'actions') {
     return (
@@ -502,6 +529,8 @@ function renderCell(
         openDrawer={openDrawer}
         actionsFor={actionsFor}
         setActionsFor={setActionsFor}
+        onTerminate={onTerminate}
+        onEdit={onEdit}
       />
     );
   }
