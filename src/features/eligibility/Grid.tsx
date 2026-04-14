@@ -11,6 +11,7 @@ import { AdvancedSearchModal } from './AdvancedSearchModal';
 import { AddMemberModal } from './AddMemberModal';
 import { TerminateModal } from './TerminateModal';
 import { EditEnrollmentModal } from './EditEnrollmentModal';
+import { EditDemographicsModal } from './EditDemographicsModal';
 import { SavedViews } from './SavedViews';
 import { MemberDetail } from '../member/Detail';
 import styles from './Grid.module.css';
@@ -89,6 +90,7 @@ export function Grid() {
   const [drawerMemberId, setDrawerMemberId] = useState<string | null>(null);
   const [terminateRow, setTerminateRow] = useState<Enrollment | null>(null);
   const [editRow, setEditRow] = useState<Enrollment | null>(null);
+  const [editDetailsRow, setEditDetailsRow] = useState<Enrollment | null>(null);
   const [actionsFor, setActionsFor] = useState<string | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
   const colsMenuRef = useClickOutside<HTMLDivElement>(colsMenuOpen, () => setColsMenuOpen(false));
@@ -318,7 +320,7 @@ export function Grid() {
             {items.map((row) => (
               <tr key={row.enrollmentId}>
                 {visibleCols.map((c) => (
-                  <td key={String(c.key)}>{renderCell(row, c.key, setDrawerMemberId, actionsFor, setActionsFor, setTerminateRow, setEditRow)}</td>
+                  <td key={String(c.key)}>{renderCell(row, c.key, setDrawerMemberId, actionsFor, setActionsFor, setTerminateRow, setEditRow, setEditDetailsRow)}</td>
                 ))}
               </tr>
             ))}
@@ -386,6 +388,10 @@ export function Grid() {
       )}
 
       {editRow && <EditEnrollmentModal row={editRow} onClose={() => setEditRow(null)} />}
+
+      {editDetailsRow && (
+        <EditDemographicsModal row={editDetailsRow} onClose={() => setEditDetailsRow(null)} />
+      )}
 
       {drawerMemberId && (
         <MemberDetail memberId={drawerMemberId} onClose={() => setDrawerMemberId(null)} />
@@ -461,6 +467,7 @@ function ActionsCell({
   setActionsFor,
   onTerminate,
   onEdit,
+  onEditDetails,
 }: {
   row: Enrollment;
   openDrawer: (memberId: string) => void;
@@ -468,6 +475,7 @@ function ActionsCell({
   setActionsFor: (id: string | null) => void;
   onTerminate: (row: Enrollment) => void;
   onEdit: (row: Enrollment) => void;
+  onEditDetails: (row: Enrollment) => void;
 }) {
   const open = actionsFor === row.enrollmentId;
   const handleClose = useCallback(() => setActionsFor(null), [setActionsFor]);
@@ -507,6 +515,13 @@ function ActionsCell({
           >
             Change plan
           </button>
+          <button
+            type="button"
+            title="Edit member name, DOB, gender"
+            onClick={() => { onEditDetails(row); setActionsFor(null); }}
+          >
+            Edit details
+          </button>
         </div>
       )}
     </div>
@@ -521,6 +536,7 @@ function renderCell(
   setActionsFor: (id: string | null) => void,
   onTerminate: (row: Enrollment) => void,
   onEdit: (row: Enrollment) => void,
+  onEditDetails: (row: Enrollment) => void,
 ): React.ReactNode {
   if (key === 'actions') {
     return (
@@ -531,6 +547,7 @@ function renderCell(
         setActionsFor={setActionsFor}
         onTerminate={onTerminate}
         onEdit={onEdit}
+        onEditDetails={onEditDetails}
       />
     );
   }

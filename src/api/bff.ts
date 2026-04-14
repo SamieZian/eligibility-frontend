@@ -202,6 +202,24 @@ const CHANGE_PLAN = gql`
   }
 `;
 
+const UPDATE_MEMBER_DEMOGRAPHICS = gql`
+  mutation UpdateMemberDemographics(
+    $memberId: ID!
+    $firstName: String
+    $lastName: String
+    $dob: Date
+    $gender: String
+  ) {
+    updateMemberDemographics(
+      memberId: $memberId
+      firstName: $firstName
+      lastName: $lastName
+      dob: $dob
+      gender: $gender
+    )
+  }
+`;
+
 const GROUP_ADMIN = gql`
   query GroupAdmin {
     payers { id name }
@@ -310,6 +328,22 @@ export async function changeEnrollmentPlan(input: ChangePlanInput): Promise<stri
     CHANGE_PLAN, { ...input } as Record<string, unknown>,
   );
   return changeEnrollmentPlan;
+}
+
+export interface UpdateMemberDemographicsInput {
+  memberId: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  dob?: string | null;
+  gender?: string | null;
+}
+export async function updateMemberDemographics(
+  input: UpdateMemberDemographicsInput,
+): Promise<boolean> {
+  const { updateMemberDemographics } = await client().request<{
+    updateMemberDemographics: boolean;
+  }>(UPDATE_MEMBER_DEMOGRAPHICS, { ...input } as Record<string, unknown>);
+  return updateMemberDemographics;
 }
 
 export interface GroupAdminBundle {
