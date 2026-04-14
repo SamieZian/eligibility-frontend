@@ -2,6 +2,7 @@ import cx from 'classnames';
 import { useEffect, useState } from 'react';
 import { BannerStack } from '../components/Banner';
 import { Grid } from '../features/eligibility/Grid';
+import { GroupsAdmin } from '../features/groups/GroupsAdmin';
 import { FileUpload } from '../features/upload/FileUpload';
 import { useGlobalStatus } from './GlobalStatus';
 import { useRouter } from '../lib/router';
@@ -14,6 +15,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { path: '/eligibility', label: 'Eligibility' },
+  { path: '/groups', label: 'Groups' },
   { path: '/upload', label: 'Upload' },
   { path: '/about', label: 'About' },
 ];
@@ -68,6 +70,7 @@ export function AppShell() {
       <BannerStack />
       <main className={styles.main}>
         {activePath === '/eligibility' && <Grid />}
+        {activePath === '/groups' && <GroupsAdmin />}
         {activePath === '/upload' && <FileUpload />}
         {activePath === '/about' && <AboutPage />}
       </main>

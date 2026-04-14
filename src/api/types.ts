@@ -123,3 +123,24 @@ export interface AddMemberResult {
   enrollmentId: string;
   memberName: string;
 }
+
+export interface Payer {
+  id: string;
+  name: string;
+}
+
+export interface Subgroup {
+  id: string;
+  employerId: string;
+  name: string;
+}
+
+export interface GroupAdminView {
+  id: string;
+  name: string;
+  externalId: string | null;
+  payerId: string | null;
+  payerName: string | null;
+  subgroups: Subgroup[];
+  visiblePlanIds: string[];
+}

@@ -5,10 +5,13 @@ import type {
   EmployerSummary,
   Enrollment,
   FileJob,
+  GroupAdminView,
   Page,
+  Payer,
   PlanSummary,
   SearchFilter,
   SearchResult,
+  Subgroup,
   TimelineSegment,
   UploadResponse,
 } from './types';
@@ -179,6 +182,40 @@ const ADD_MEMBER = gql`
   }
 `;
 
+const GROUP_ADMIN = gql`
+  query GroupAdmin {
+    payers { id name }
+    plans { id planCode name }
+    groupAdmin {
+      id
+      name
+      externalId
+      payerId
+      payerName
+      subgroups { id employerId name }
+      visiblePlanIds
+    }
+  }
+`;
+
+const CREATE_PAYER = gql`mutation CP($name: String!) { createPayer(name: $name) { id name } }`;
+const CREATE_EMPLOYER = gql`
+  mutation CE($payerId: ID!, $name: String!, $externalId: String) {
+    createEmployer(payerId: $payerId, name: $name, externalId: $externalId) {
+      id name externalId payerId
+    }
+  }
+`;
+const DELETE_EMPLOYER = gql`mutation DE($id: ID!) { deleteEmployer(employerId: $id) }`;
+const CREATE_SUBGROUP = gql`
+  mutation CS($employerId: ID!, $name: String!) {
+    createSubgroup(employerId: $employerId, name: $name) { id employerId name }
+  }
+`;
+const DELETE_SUBGROUP = gql`mutation DS($id: ID!) { deleteSubgroup(subgroupId: $id) }`;
+const ATTACH_PLAN = gql`mutation AP($e: ID!, $p: ID!) { attachPlan(employerId: $e, planId: $p) }`;
+const DETACH_PLAN = gql`mutation DP($e: ID!, $p: ID!) { detachPlan(employerId: $e, planId: $p) }`;
+
 export async function searchEnrollments(filter: SearchFilter, page: Page): Promise<SearchResult> {
   const { searchEnrollments } = await client().request<{ searchEnrollments: SearchResult }>(SEARCH, {
     filter,
@@ -238,6 +275,44 @@ export async function replayFile(fileId: string): Promise<boolean> {
 export async function addMember(input: AddMemberInput): Promise<AddMemberResult> {
   const { addMember } = await client().request<{ addMember: AddMemberResult }>(ADD_MEMBER, { input });
   return addMember;
+}
+
+export interface GroupAdminBundle {
+  payers: Payer[];
+  plans: PlanSummary[];
+  groupAdmin: GroupAdminView[];
+}
+export async function groupAdmin(): Promise<GroupAdminBundle> {
+  return client().request<GroupAdminBundle>(GROUP_ADMIN);
+}
+export async function createPayer(name: string): Promise<Payer> {
+  const { createPayer } = await client().request<{ createPayer: Payer }>(CREATE_PAYER, { name });
+  return createPayer;
+}
+export async function createEmployer(payerId: string, name: string, externalId?: string): Promise<EmployerSummary> {
+  const { createEmployer } = await client().request<{ createEmployer: EmployerSummary }>(
+    CREATE_EMPLOYER, { payerId, name, externalId: externalId ?? null });
+  return createEmployer;
+}
+export async function deleteEmployer(id: string): Promise<boolean> {
+  const { deleteEmployer } = await client().request<{ deleteEmployer: boolean }>(DELETE_EMPLOYER, { id });
+  return deleteEmployer;
+}
+export async function createSubgroup(employerId: string, name: string): Promise<Subgroup> {
+  const { createSubgroup } = await client().request<{ createSubgroup: Subgroup }>(CREATE_SUBGROUP, { employerId, name });
+  return createSubgroup;
+}
+export async function deleteSubgroup(id: string): Promise<boolean> {
+  const { deleteSubgroup } = await client().request<{ deleteSubgroup: boolean }>(DELETE_SUBGROUP, { id });
+  return deleteSubgroup;
+}
+export async function attachPlan(employerId: string, planId: string): Promise<boolean> {
+  const { attachPlan } = await client().request<{ attachPlan: boolean }>(ATTACH_PLAN, { e: employerId, p: planId });
+  return attachPlan;
+}
+export async function detachPlan(employerId: string, planId: string): Promise<boolean> {
+  const { detachPlan } = await client().request<{ detachPlan: boolean }>(DETACH_PLAN, { e: employerId, p: planId });
+  return detachPlan;
 }
 
 export async function uploadFile(file: File): Promise<UploadResponse> {

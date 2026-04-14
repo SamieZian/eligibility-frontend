@@ -1,0 +1,197 @@
+.wrap {
+  padding: 24px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.head { margin-bottom: 24px; }
+.head h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+.lead {
+  font-size: 14px;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.section h2 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  margin: 0 0 12px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.input {
+  flex: 1;
+  min-width: 180px;
+  padding: 7px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.pillList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.pill {
+  padding: 4px 12px;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  border: 1px solid var(--brand-200);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+}
+[data-theme='dark'] .pill {
+  background: rgba(129, 140, 248, 0.18);
+  color: var(--color-accent);
+  border-color: rgba(129, 140, 248, 0.4);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+  margin-top: 6px;
+}
+.card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.cardHead h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 2px;
+  color: var(--color-text);
+}
+.meta {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+.meta code {
+  background: var(--color-surface-hover);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+
+.cardBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.col h4 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  margin: 0 0 4px;
+}
+
+.subList, .planList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.subItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.subDel {
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.subDel:hover { color: var(--color-danger-fg); }
+
+.planItem {
+  font-size: 12px;
+}
+.planLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+}
+.planLabel:hover { background: var(--color-surface-hover); }
+.planLabel code {
+  background: var(--color-surface-hover);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  margin-left: auto;
+}
+
+.muted { color: var(--color-muted); font-size: 12px; }
+.empty {
+  padding: 24px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .cardBody { grid-template-columns: 1fr; }
+}
